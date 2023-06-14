@@ -1,3 +1,6 @@
+* {
+    box-sizing: border-box;
+  }
 :root {
   --bg-color: rgba(150, 150, 150, 1);
 
@@ -7,10 +10,9 @@
   --border-bottom-color: rgba(0, 0, 0, 0.5);
 
   --color-0: #eaeaea;
-  --color-1: #ff6600;
-  --color-2: #eec900;
-  --color-3: #0000ff;
-  --color-4: #cc00ff;
+  --color-X: #ff6600;
+  --color-1: #ff0000;
+  --color-Y: #0000ff;
   --cols: 12;
   --rows: 16;
   --tile-size: 20px;
@@ -20,20 +22,16 @@
     background-color: var(--color-0);
   }
 
+  .color-X {
+    background-color: var(--color-X);
+  }
+
   .color-1 {
     background-color: var(--color-1);
   }
 
-  .color-2 {
-    background-color: var(--color-2);
-  }
-
-  .color-3 {
-    background-color: var(--color-3);
-  }
-
-  .color-4 {
-    background-color: var(--color-4);
+  .color-Y {
+    background-color: var(--color-Y);
   }
 
   .grid-square {
@@ -45,5 +43,12 @@
     border-top-color: var(--border-top-color);
     border-right-color: var(--border-right-color);
     border-bottom-color: var(--border-bottom-color);
+  }
+
+  .grid-board {
+    display: grid;
+    grid-template-columns: repeat(var(--cols), var(--tile-size));
+    grid-gap: 0;
+    align-self: flex-start;
   }
 }
