@@ -1,6 +1,6 @@
 * {
-    box-sizing: border-box;
-  }
+  box-sizing: border-box;
+}
 :root {
   --bg-color: rgba(150, 150, 150, 1);
 
@@ -15,40 +15,45 @@
   --color-Y: #0000ff;
   --cols: 12;
   --rows: 16;
-  --tile-size: 20px;
+  --tile-size: 30px;
   --border-width: 5px;
+}
+.color-0 {
+  background-color: var(--color-0);
+}
 
-  .color-0 {
-    background-color: var(--color-0);
-  }
+.color-X {
+  background-color: var(--color-X);
+}
 
-  .color-X {
-    background-color: var(--color-X);
-  }
+.color-1 {
+  background-color: var(--color-1);
+}
 
-  .color-1 {
-    background-color: var(--color-1);
-  }
+.color-Y {
+  background-color: var(--color-Y);
+}
 
-  .color-Y {
-    background-color: var(--color-Y);
-  }
+.grid-square {
+  border-style: solid;
+  width: var(--tile-size);
+  height: var(--tile-size);
+  border-width: var(--border-width);
+  border-left-color: var(--border-left-color);
+  border-top-color: var(--border-top-color);
+  border-right-color: var(--border-right-color);
+  border-bottom-color: var(--border-bottom-color);
+}
 
-  .grid-square {
-    border-style: solid;
-    width: var(--tile-size);
-    height: var(--tile-size);
-    border-width: var(--border-width);
-    border-left-color: var(--border-left-color);
-    border-top-color: var(--border-top-color);
-    border-right-color: var(--border-right-color);
-    border-bottom-color: var(--border-bottom-color);
-  }
+.grid-board {
+  display: grid;
+  grid-template-columns: repeat(var(--cols), var(--tile-size));
+  grid-gap: 0;
+  align-self: flex-start;
+}
 
-  .grid-board {
-    display: grid;
-    grid-template-columns: repeat(var(--cols), var(--tile-size));
-    grid-gap: 0;
-    align-self: flex-start;
-  }
+.App {
+  display: flex;
+  justify-content: center;
+  margin: 0 auto;
 }
