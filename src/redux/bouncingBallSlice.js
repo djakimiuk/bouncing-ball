@@ -6,7 +6,7 @@ export const bouncingBallSlice = createSlice({
   initialState: {
     inputGrid: board,
     displayGrid: board,
-    ballPosition: { row: 0, col: 0 },
+    ballPosition: { row: board.length - 1, col: 0 },
     ballDirection: null,
   },
   reducers: {
@@ -16,10 +16,13 @@ export const bouncingBallSlice = createSlice({
     setBallDirection: (state, value) => {
       state.ballDirection = value.payload;
     },
+    setDisplayGrid: (state, value) => {
+      state.displayGrid = value.payload;
+    },
   },
 });
 
-export const { changeBallPosition, setBallDirection } =
+export const { changeBallPosition, setBallDirection, setDisplayGrid } =
   bouncingBallSlice.actions;
 
 export default bouncingBallSlice.reducer;

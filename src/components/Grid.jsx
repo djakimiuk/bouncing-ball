@@ -1,7 +1,7 @@
 import { useDispatch, useSelector } from "react-redux";
 import GridSquare from "./GridSquare";
 import { useEffect } from "react";
-import { changeBallPosition } from "../redux/bouncingBallSlice";
+import { changeBallPosition, setDisplayGrid } from "../redux/bouncingBallSlice";
 
 function Grid(props) {
   const dispatch = useDispatch();
@@ -22,23 +22,69 @@ function Grid(props) {
       const ballY = inputBoard[i].indexOf("1");
       if (ballY !== -1) {
         dispatch(changeBallPosition({ row: i, col: ballY }));
-        return;
+        break;
       }
     }
   };
 
-  const setBallDirection = (inputBallPosition) => {
+  const setBallDirection = (inputBallPosition, inputBoard) => {
+    const directions = ["DR", "UL", "DL", "UR"];
     const availableDirections = [];
-    const DR = board[inputBallPosition.row + 1][inputBallPosition.col + 1];
-    const DL = board[inputBallPosition.row + 1][inputBallPosition.col - 1];
-    const UR = board[inputBallPosition.row - 1][inputBallPosition.col + 1];
-    const UL = board[inputBallPosition.row - 1][inputBallPosition.col - 1];
-    
+    for (let i = 0; i < directions.length; i++) {
+      if (getBoardValue(inputBoard, inputBallPosition, directions[i]) !== "X") {
+        availableDirections.push(directions[i]);
+      }
+    }
+    const randomDirectionIndex = Math.floor(
+      Math.random() * (availableDirections.length + 1)
+    );
+    dispatch(setBallDirection(availableDirections[randomDirectionIndex]));
   };
+
+  const linearMoveDRULPosition = (row) => {
+    return { row: row, col: row };
+  };
+
+  const linearMoveDLURPosition = (row) => {
+    return { row: row, col: -row + 2 };
+  };
+
+  const getBoardValue = (inputBoard, inputBallPosition, direction) => {
+    let position;
+    switch (direction) {
+      case "DR":
+        position = linearMoveDRULPosition(inputBallPosition.row + 1);
+        console.log(position);
+        return inputBoard[position.row][position.col];
+      case "UL":
+        position = linearMoveDRULPosition(inputBallPosition.row - 1);
+        console.log(position);
+        return inputBoard[position.row][position.col];
+      case "DL":
+        position = linearMoveDLURPosition(inputBallPosition.row + 1);
+        console.log(position);
+        return inputBoard[position.row][position.col];
+      case "UR":
+        position = linearMoveDLURPosition(inputBallPosition.row - 1);
+        console.log(position);
+        return inputBoard[position.row][position.col];
+      default:
+        null;
+    }
+  };
+
+  const moveTheBall = () => {
+    setBallDirection(ballPosition, board);
+    const newPosition = linearMoveDLURPosition(2);
+    const boardCopy = [...board];
+    boardCopy[ballPosition.row][ballPosition.col] = 0;
+    boardCopy[newPosition.row][newPosition.col] = 1;
+    dispatch(setDisplayGrid(boardCopy));
+  };
+
   useEffect(() => {
     findBallPosition(board);
   }, []);
-
   return <div className="grid-board">{grid}</div>;
 }
 
