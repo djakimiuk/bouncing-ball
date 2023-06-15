@@ -20,12 +20,17 @@ export const bouncingBallSlice = createSlice({
     changeBallDirection: (state, value) => {
       state.ballDirection = value.payload;
     },
-    setDisplayGrid: (state) => {
+    updateDisplayGrid: (state) => {
       let gridCopy = [...state.displayGrid];
       gridCopy[state.previousBallPosition.row][
         state.previousBallPosition.col
       ] = 0;
       gridCopy[state.ballPosition.row][state.ballPosition.col] = 1;
+      state.displayGrid = gridCopy;
+    },
+    setYsquareTo0: (state, value) => {
+      let gridCopy = [...state.displayGrid];
+      gridCopy[value.payload.row][value.payload.col] = 0;
       state.displayGrid = gridCopy;
     },
   },
@@ -34,8 +39,9 @@ export const bouncingBallSlice = createSlice({
 export const {
   changeBallPosition,
   changeBallDirection,
-  setDisplayGrid,
+  updateDisplayGrid,
   changePreviousBallPosition,
+  setYsquareTo0,
 } = bouncingBallSlice.actions;
 
 export default bouncingBallSlice.reducer;

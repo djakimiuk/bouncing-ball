@@ -3,22 +3,24 @@ import GridSquare from "./GridSquare";
 import { useEffect } from "react";
 import {
   changeBallPosition,
-  setDisplayGrid,
+  updateDisplayGrid,
   changeBallDirection,
-  changePreviousBallPosition
+  changePreviousBallPosition,
+  setYsquareTo0,
 } from "../redux/bouncingBallSlice";
 
 function Grid(props) {
   const dispatch = useDispatch();
   let board = useSelector((state) => state.bouncingBall.displayGrid);
   let ballPosition = useSelector((state) => state.bouncingBall.ballPosition);
+  let ballDirection = useSelector((state) => state.bouncingBall.ballDirection);
   console.log("ballPosition from code", ballPosition);
   const grid = [];
   for (let row = 0; row < board.length; row++) {
     grid.push([]);
     for (let col = 0; col < board[0].length; col++) {
       grid[row].push(
-        <GridSquare key={`${col}${row}`} color={board[row][col]} />
+        <GridSquare key={`${col}${row}`} color={`${board[row][col]}`} />
       );
     }
   }
@@ -37,7 +39,7 @@ function Grid(props) {
     const directions = ["DR", "UL", "DL", "UR"];
     const availableDirections = [];
     for (let i = 0; i < 4; i++) {
-      if (getBoardValue(inputBoard, inputBallPosition, directions[i]) !== "X") {
+      if (canBallMoveForward(inputBoard, inputBallPosition, directions[i])) {
         availableDirections.push(directions[i]);
         console.log(`inside iteration`);
         console.log(`available directions`, availableDirections);
@@ -52,8 +54,35 @@ function Grid(props) {
       "ball direction move",
       availableDirections[randomDirectionIndex]
     );
-    let ballDirection = availableDirections[randomDirectionIndex];
-    dispatch(changeBallDirection(ballDirection));
+    dispatch(changeBallDirection(availableDirections[randomDirectionIndex]));
+  };
+
+  const canBallMoveForward = (inputBoard, inputBallPosition, direction) => {
+    const nextGridSquareValue = getNextGridSquare(
+      inputBoard,
+      inputBallPosition,
+      direction
+    );
+    const nextGridSquarePosition = getNextGridSquare(
+      inputBoard,
+      inputBallPosition,
+      direction,
+      true
+    );
+    console.log(`nextgridsquare pos: ${nextGridSquarePosition}`);
+    console.log(`nextgridsquare val: ${nextGridSquareValue}`);
+    console.log(
+      `params: ${direction},${inputBallPosition.row}, ${inputBoard} `
+    );
+    switch (nextGridSquareValue) {
+      case "X":
+        return false;
+      case "Y":
+        dispatch(setYsquareTo0(nextGridSquarePosition));
+        return false;
+      default:
+        return nextGridSquarePosition;
+    }
   };
 
   const linearMoveDRULPosition = (row) => {
@@ -65,46 +94,77 @@ function Grid(props) {
     return { row: row, col: 2 - row };
   };
 
-  const getBoardValue = (inputBoard, inputBallPosition, direction) => {
-    let position;
+  const getNextGridSquare = (
+    inputBoard,
+    inputBallPosition,
+    direction,
+    flag
+  ) => {
+    let nextPosition;
 
     switch (direction) {
       case "DR":
-        position = linearMoveDRULPosition(inputBallPosition.row + 1);
-        console.log("getBoardValueDR", position);
-        console.log("board value", position.row, position.col);
-        return inputBoard[position.row][position.col];
+        nextPosition = linearMoveDRULPosition(inputBallPosition.row + 1);
+        if (flag) {
+          return { nextPosition };
+        }
+        return inputBoard[nextPosition.row][nextPosition.col];
       case "UL":
-        position = linearMoveDRULPosition(inputBallPosition.row - 1);
-        console.log("getBoardValueUL", position);
-        return inputBoard[position.row][position.col];
+        nextPosition = linearMoveDRULPosition(inputBallPosition.row - 1);
+        if (flag) {
+          return { nextPosition };
+        }
+        return inputBoard[nextPosition.row][nextPosition.col];
       case "DL":
-        position = linearMoveDLURPosition(inputBallPosition.row + 1);
-        console.log("getBoardValueDL", position);
-        return inputBoard[position.row][position.col];
+        nextPosition = linearMoveDLURPosition(inputBallPosition.row + 1);
+        if (flag) {
+          return { nextPosition };
+        }
+        return inputBoard[nextPosition.row][nextPosition.col];
       case "UR":
-        position = linearMoveDLURPosition(inputBallPosition.row - 1);
-        console.log("getBoardValueUR", position);
-        return inputBoard[position.row][position.col];
+        nextPosition = linearMoveDLURPosition(inputBallPosition.row - 1);
+        if (flag) {
+          return { nextPosition };
+        }
+        return inputBoard[nextPosition.row][nextPosition.col];
       default:
         null;
     }
   };
 
-  const moveTheBall = () => {
-    setBallDirection(ballPosition, board);
-    const newPosition = linearMoveDRULPosition(2);
-    dispatch(changePreviousBallPosition(ballPosition))
-    dispatch(changeBallPosition(newPosition));
-    dispatch(setDisplayGrid());
+  const startGame = () => {
+    const inputBallPosition = { row: ballPosition.row, col: ballPosition.col };
+    const [inputBoard, direction] = [board, ballDirection];
+    // console.log(
+    //   `Ball position ${inputBallPosition}, board: ${inputBoard}, direction ${direction}`
+    // );
+    setBallDirection(inputBallPosition, inputBoard);
+
+    moveTheBall(direction, inputBoard, inputBallPosition);
   };
 
+  const moveTheBall = (direction, inputBoard, inputBallPosition) => {
+    let nextPosition = canBallMoveForward(
+      inputBoard,
+      inputBallPosition,
+      direction
+    );
+    console.log(nextPosition);
+    if (nextPosition) {
+      dispatch(changePreviousBallPosition(ballPosition));
+      dispatch(changeBallPosition(nextPosition));
+      dispatch(updateDisplayGrid());
+    } else {
+      setBallDirection(inputBallPosition, inputBoard);
+      moveTheBall(direction);
+    }
+  };
   useEffect(() => {
     findBallPosition(board);
   }, []);
   return (
     <div className="grid-board">
-      {grid} <button onClick={() => moveTheBall()}>TEST</button>
+      {grid} <button onClick={() => startGame()}>TEST</button>
     </div>
   );
 }
