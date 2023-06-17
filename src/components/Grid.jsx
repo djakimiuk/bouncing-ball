@@ -135,42 +135,30 @@ function Grid(props) {
     }
   };
 
-  const linearMoveDRULPosition = (row) => {
-    return { row: row, col: row };
-  };
+  const getNextGridSquare = (direction) => {
+    let result = { position: null, value: null };
+    let currentPositionRow = ballPosition[0];
+    let currentPositionCol = ballPosition[1];
+    let nextPositionRow = result.position[0];
+    let nextPositionCol = result.position[1];
 
-  const linearMoveDLURPosition = (row) => {
-    console.log(`row inside DLUR, ${row}`);
-    return { row: row, col: 15 - row };
-  };
-
-  const getNextGridSquare = (direction, flag) => {
-    let nextPosition;
     switch (direction) {
       case "DR":
-        nextPosition = linearMoveDRULPosition(ballPosition.row + 1);
-        if (flag) {
-          return nextPosition;
-        }
-        return board[nextPosition.row][nextPosition.col];
+        result.positon = [[currentPositionRow + 1, currentPositionCol + 1]];
+        result.value = board[nextPositionRow][nextPositionCol];
+        return result;
       case "UL":
-        nextPosition = linearMoveDRULPosition(ballPosition.row - 1);
-        if (flag) {
-          return nextPosition;
-        }
-        return board[nextPosition.row][nextPosition.col];
+        result.positon = [[currentPositionRow - 1, currentPositionCol - 1]];
+        result.value = board[nextPositionRow][nextPositionCol];
+        return result;
       case "DL":
-        nextPosition = linearMoveDLURPosition(ballPosition.row + 1);
-        if (flag) {
-          return nextPosition;
-        }
-        return board[nextPosition.row][nextPosition.col];
+        result.positon = [[currentPositionRow + 1, currentPositionCol - 1]];
+        result.value = board[nextPositionRow][nextPositionCol];
+        return result;
       case "UR":
-        nextPosition = linearMoveDLURPosition(ballPosition.row - 1);
-        if (flag) {
-          return nextPosition;
-        }
-        return board[nextPosition.row][nextPosition.col];
+        result.positon = [[currentPositionRow - 1, currentPositionCol + 1]];
+        result.value = board[nextPositionRow][nextPositionCol];
+        return result;
       default:
         null;
     }
