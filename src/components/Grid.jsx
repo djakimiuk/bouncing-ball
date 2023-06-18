@@ -1,52 +1,45 @@
-import { useDispatch, useSelector } from "react-redux";
 import GridSquare from "./GridSquare";
-import { useEffect } from "react";
-import {
-  changeBallPosition,
-  changePreviousBallPosition,
-  changeBallDirection,
-  changePreviousBallDirection,
-  updateDisplayGrid,
-  setPositionOfY,
-  setYsquare0,
-  findBallPosition,
-} from "../redux/bouncingBallSlice";
+import { useEffect, useState } from "react";
+import board from "../ExamInput";
 
 function Grid(props) {
-  const dispatch = useDispatch();
-  let board = useSelector((state) => state.bouncingBall.displayGrid);
-  let ballPosition = useSelector((state) => state.bouncingBall.ballPosition);
-  let previousBallPosition = useSelector(
-    (state) => state.bouncingBall.previousBallPosition
-  );
-  let ballDirection = useSelector((state) => state.bouncingBall.ballDirection);
-  let previousBallDirection = useSelector(
-    (state) => state.bouncingBall.previousBallDirection
-  );
-  let positionOfY = useSelector((state) => state.bouncingBall.positionOfY);
+  const [grid, setGrid] = useState(board);
+  const [gridToDisplay, setGridToDisplay] = useState(board);
+  const [isGameStarted, setIsGameStarted] = useState(false);
+  const [ballPosition, setBallPosition] = useState([]);
+  const [previousBallPosition, setPreviousBallPosition] = useState([]);
+  const [ballDirection, setBallDirection] = useState(null);
+  const [previousBallDirection, setPreviousBallDirection] = useState([]);
+  const [positionOfYsquare, setPositionOfYsquare] = useState([]);
 
-  console.log("ballPosition from code", ballPosition);
-
-  const grid = [];
-  for (let row = 0; row < board.length; row++) {
-    grid.push([]);
-    for (let col = 0; col < board[0].length; col++) {
-      grid[row].push(
-        <GridSquare key={`${col}${row}`} color={`${board[row][col]}`} />
-      );
+  const findBallPosition = () => {
+    for (let i = 0; i < gridToDisplay.length; i++) {
+      const ballY = gridToDisplay[i].indexOf("1");
+      if (ballY !== -1) {
+        console.log(`before setting ball position`);
+        setPreviousBallPosition([i, ballY]);
+        setBallPosition([i, ballY]);
+        break;
+      }
     }
-  }
+  };
 
-  // const findBallPosition = () => {
-  //   for (let i = 0; i < board.length; i++) {
-  //     const ballY = board[i].indexOf("1");
-  //     if (ballY !== -1) {
-  //       dispatch(changeBallPosition([i, ballY]));
-  //       break;
-  //     }
-  //   }
-  // };
-
+  const renderGrid = () => {
+    const grid = [];
+    console.log(gridToDisplay);
+    for (let row = 0; row < gridToDisplay.length; row++) {
+      grid.push([]);
+      for (let col = 0; col < gridToDisplay[0].length; col++) {
+        grid[row].push(
+          <GridSquare
+            key={`${col}${row}`}
+            color={`${gridToDisplay[row][col]}`}
+          />
+        );
+      }
+    }
+    return grid;
+  };
   const getAvailableDirections = () => {
     const directions = ["DR", "UL", "DL", "UR"];
     const availableDirections = directions.filter(canBallMoveForward);
@@ -81,23 +74,21 @@ function Grid(props) {
     return forbiddenDirection;
   };
 
-  const setBallDirection = () => {
+  const defineBallDirection = () => {
+    setPreviousBallDirection(ballDirection);
     const availableDirections = getAvailableDirections();
-    console.log(availableDirections);
+    console.log(`available directions`, availableDirections);
     const randomDirectionIndex = Math.floor(
       Math.random() * availableDirections.length
     );
     console.log("randomDirectionIndex", randomDirectionIndex);
-    console.log(availableDirections);
     console.log(
       "ball direction move",
       availableDirections[randomDirectionIndex]
     );
     const direction = availableDirections[randomDirectionIndex];
     console.log(`direction before state change ${direction}`);
-    dispatch(changePreviousBallDirection(ballDirection));
-    dispatch(changeBallDirection(direction));
-
+    setBallDirection(direction);
     console.log(`direction after state change ${ballDirection}`);
     return direction;
   };
@@ -116,7 +107,6 @@ function Grid(props) {
       case "X":
         return false;
       case "Y":
-        dispatch(setPositionOfY(nextGridSquare.position));
         return false;
       case undefined:
         return false;
@@ -129,6 +119,7 @@ function Grid(props) {
 
   const getNextGridSquare = (direction) => {
     let result = { position: null, value: null };
+    console.log(`ballpositon:`, ballPosition);
 
     switch (direction) {
       case "DR":
@@ -153,35 +144,72 @@ function Grid(props) {
     return result;
   };
 
+  const updateDisplayGrid = (previousPosition, newPosition) => {
+    let gridCopy = [...gridToDisplay];
+    console.log(`In updateDisplayGrid block ball position: ${newPosition}`);
+    console.log(
+      `In updateDisplayGrid block ball previous position: ${previousPosition}`
+    );
+    gridCopy[previousPosition[0]][previousPosition[1]] = "0";
+    if (newPosition) {
+      gridCopy[newPosition[0]][newPosition[1]] = "1";
+    }
+    setGridToDisplay(gridCopy);
+  };
+
   const moveTheBall = (ballDirection) => {
     const nextGridSquare = getNextGridSquare(ballDirection);
-
     console.log("next position from moveTheBall:", nextGridSquare?.position);
     if (canBallMoveForward(ballDirection)) {
-      dispatch(changePreviousBallPosition(ballPosition));
-      dispatch(changeBallPosition(nextGridSquare.position));
-      dispatch(updateDisplayGrid());
+      setPreviousBallPosition(ballPosition);
+      setBallPosition(nextGridSquare.position);
+      updateDisplayGrid(ballPosition, nextGridSquare.position);
     } else {
       console.log(`BALL DIRECTION CHANGE!!`);
-      const newDirection = setBallDirection();
+      const newDirection = defineBallDirection();
       console.log(newDirection);
-      moveTheBall(newDirection);
-      dispatch(setYsquare0(nextGridSquare.position));
+      setBallDirection(newDirection);
+      if (nextGridSquare.value === "Y") {
+        updateDisplayGrid(nextGridSquare.position);
+      }
     }
   };
 
   const startGame = () => {
-    const direction = ballDirection ? ballDirection : setBallDirection();
+    setIsGameStarted(true);
+    console.log(`ball position after start`, ballPosition);
+    const direction = ballDirection ? ballDirection : defineBallDirection();
+    console.log(`DIRECTION!!!`, direction);
     moveTheBall(direction);
   };
+
   useEffect(() => {
-    dispatch(findBallPosition());
-  }, [dispatch]);
+    console.log(`Actual ball position ${ballPosition}`);
+    console.log(`Previous ball position ${previousBallPosition}`);
+  }, [ballPosition, previousBallPosition]);
+
+  useEffect(() => {
+    findBallPosition();
+    console.log("ballPosition from code", ballPosition);
+  }, []);
+
+  useEffect(() => {
+    if (isGameStarted) {
+      const gameInterval = setInterval(() => {
+        moveTheBall(ballDirection);
+      }, 100);
+      return () => {
+        clearInterval(gameInterval);
+      };
+    }
+  }, [isGameStarted, ballPosition, previousBallDirection, ballDirection]);
   return (
     <>
-      <div className="grid-board">{grid}</div>
-      <button onClick={() => startGame()}>START</button>
-      <button>STOP</button>
+      <div className="grid-board">{renderGrid()}</div>
+      <div>
+        <button onClick={() => startGame()}>START</button>
+        <button>STOP</button>
+      </div>
     </>
   );
 }
