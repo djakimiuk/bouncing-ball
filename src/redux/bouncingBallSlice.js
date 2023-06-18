@@ -40,6 +40,15 @@ export const bouncingBallSlice = createSlice({
       gridCopy[state.positionOfY[0]][state.positionOfY[1]] = "0";
       state.displayGrid = gridCopy;
     },
+    findBallPosition: (state) => {
+      for (let i = 0; i < state.displayGrid.length; i++) {
+        const ballY = state.displayGrid[i].indexOf("1");
+        if (ballY !== -1) {
+          state.ballPosition = [i, ballY];
+          break;
+        }
+      }
+    },
   },
 });
 
@@ -51,6 +60,7 @@ export const {
   updateDisplayGrid,
   setPositionOfY,
   setYsquare0,
+  findBallPosition,
 } = bouncingBallSlice.actions;
 
 export default bouncingBallSlice.reducer;
