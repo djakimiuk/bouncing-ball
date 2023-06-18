@@ -10,27 +10,6 @@ function Grid() {
   const [ballDirection, setBallDirection] = useState(null);
   const [previousBallDirection, setPreviousBallDirection] = useState([]);
 
-  //sets the state flag to true and runs interval to move the ball
-  const startGame = () => {
-    setIsGameStarted(true);
-  };
-
-  //on component mount sets initial ball position on the grid
-  useEffect(() => {
-    findBallPosition();
-  }, []);
-
-  useEffect(() => {
-    if (isGameStarted) {
-      const gameInterval = setInterval(() => {
-        moveTheBall(ballDirection);
-      }, 100);
-      return () => {
-        clearInterval(gameInterval);
-      };
-    }
-  }, [isGameStarted, ballPosition, previousBallDirection, ballDirection]);
-
   const findBallPosition = () => {
     for (let i = 0; i < gridToDisplay.length; i++) {
       const ballY = gridToDisplay[i].indexOf("1");
@@ -174,11 +153,29 @@ function Grid() {
     return grid;
   };
 
+  //on component mount sets initial ball position on the grid
+  useEffect(() => {
+    findBallPosition();
+  }, []);
+
+  useEffect(() => {
+    if (isGameStarted) {
+      const gameInterval = setInterval(() => {
+        moveTheBall(ballDirection);
+      }, 100);
+      return () => {
+        clearInterval(gameInterval);
+      };
+    }
+  }, [isGameStarted, ballPosition, previousBallDirection, ballDirection]);
+
   return (
     <>
       <div className="grid-board">{renderGrid()}</div>
       <div>
-        <button onClick={() => startGame()}>START</button>
+        <button onClick={() => setIsGameStarted(!isGameStarted)}>
+          {isGameStarted ? "STOP" : "START"}
+        </button>
       </div>
     </>
   );
