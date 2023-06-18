@@ -10,10 +10,12 @@ function Grid() {
   const [ballDirection, setBallDirection] = useState(null);
   const [previousBallDirection, setPreviousBallDirection] = useState([]);
 
+  //sets the state flag to true and runs interval to move the ball
   const startGame = () => {
     setIsGameStarted(true);
   };
 
+  //on component mount sets initial ball position on the grid
   useEffect(() => {
     findBallPosition();
   }, []);
@@ -40,6 +42,7 @@ function Grid() {
     }
   };
 
+  //checking wheter is possible to move forward: if yes then make a move and update the grid else change direction
   const moveTheBall = (ballDirection) => {
     const nextGridSquare = getNextGridSquare(ballDirection);
     if (canBallMoveForward(ballDirection)) {
@@ -55,6 +58,7 @@ function Grid() {
     }
   };
 
+  //sets random move direction of the ball
   const defineBallDirection = () => {
     setPreviousBallDirection(ballDirection);
     const availableDirections = getAvailableDirections();
@@ -65,6 +69,7 @@ function Grid() {
     return direction;
   };
 
+  //gets all posible directions on current ball position, if more than possible 1 then filters !== last direction
   const getAvailableDirections = () => {
     const directions = ["DR", "UL", "DL", "UR"];
     const availableDirections = directions.filter(canBallMoveForward);
@@ -76,6 +81,7 @@ function Grid() {
     return availableDirections;
   };
 
+  //returns the previous direction to filter available directions
   const getForbiddenDirection = () => {
     let forbiddenDirection;
     switch (ballDirection) {
@@ -97,32 +103,34 @@ function Grid() {
     return forbiddenDirection;
   };
 
+  //returns position of the next grid square
   const getNextGridSquare = (direction) => {
-    let result = { position: null, value: null };
+    let nextGrid = { position: null, value: null };
 
     switch (direction) {
       case "DR":
-        result.position = [ballPosition[0] + 1, ballPosition[1] + 1];
+        nextGrid.position = [ballPosition[0] + 1, ballPosition[1] + 1];
         break;
       case "UL":
-        result.position = [ballPosition[0] - 1, ballPosition[1] - 1];
+        nextGrid.position = [ballPosition[0] - 1, ballPosition[1] - 1];
         break;
       case "DL":
-        result.position = [ballPosition[0] + 1, ballPosition[1] - 1];
+        nextGrid.position = [ballPosition[0] + 1, ballPosition[1] - 1];
         break;
       case "UR":
-        result.position = [ballPosition[0] - 1, ballPosition[1] + 1];
+        nextGrid.position = [ballPosition[0] - 1, ballPosition[1] + 1];
         break;
       default:
-        result.position = null;
+        nextGrid.position = null;
     }
 
-    if (result.position) {
-      result.value = board[result.position[0]][result.position[1]];
+    if (nextGrid.position) {
+      nextGrid.value = board[nextGrid.position[0]][nextGrid.position[1]];
     }
-    return result;
+    return nextGrid;
   };
 
+  //checks the value of the next grid square
   const canBallMoveForward = (direction) => {
     const nextGridSquare = getNextGridSquare(direction);
     switch (nextGridSquare.value) {
@@ -139,6 +147,7 @@ function Grid() {
     }
   };
 
+  //amend the grid squares values to new
   const updateDisplayGrid = (previousPosition, newPosition) => {
     let gridCopy = [...gridToDisplay];
     gridCopy[previousPosition[0]][previousPosition[1]] = "0";
@@ -148,6 +157,7 @@ function Grid() {
     setGridToDisplay(gridCopy);
   };
 
+  //prepares the grid of GridSquare components with their values
   const renderGrid = () => {
     const grid = [];
     for (let row = 0; row < gridToDisplay.length; row++) {
